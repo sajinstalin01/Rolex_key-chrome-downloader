@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rolex_key Downloader</title><link rel="stylesheet" href="popup.css"></head>
+<body><header><div class="mark">R_</div><div><h1>Rolex_key</h1><p>CHROME EXTENSION DOWNLOADER</p></div><button id="themeBtn" class="icon" title="Toggle theme">◐</button></header>
+<nav><button class="tab active" data-tab="download">Downloader</button><button class="tab" data-tab="history">History</button></nav>
+<main>
+<section id="downloadPanel" class="panel active">
+<label for="storeUrl">Chrome Web Store URL or extension ID</label><input id="storeUrl" placeholder="Paste listing URL or 32-character ID" autocomplete="off">
+<div class="actions"><button id="inspectBtn" class="secondary">Inspect metadata</button><button id="crxBtn">Download CRX</button></div>
+<div id="metadataCard" class="card hidden"><strong id="metaName">Extension</strong><p id="metaId"></p><p id="metaVersion"></p></div>
+<div class="separator"></div><h2>Export a local extension as ZIP</h2><p class="muted">Select files from an extension folder you own or are authorized to package. The root folder must contain manifest.json.</p>
+<input id="sourceFiles" type="file" webkitdirectory multiple><button id="zipBtn" class="wide">Create extension ZIP</button>
+<div id="notice" role="status" class="notice"></div><button id="optionsBtn" class="textbtn">Settings & updates ↗</button>
+</section>
+<section id="historyPanel" class="panel"><div class="row"><h2>Recent activity</h2><button id="clearHistoryBtn" class="textbtn">Clear</button></div><div id="historyList"><div class="empty">Your extension activity appears here.</div></div></section>
+</main><footer>v1.1.0 · Extension packages only</footer><script src="zip.js"></script><script src="popup.js"></script></body></html>
