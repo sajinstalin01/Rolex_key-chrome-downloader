@@ -1,0 +1,38 @@
+name: Validate extension source
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate JavaScript syntax
+        run: |
+          node --check popup.js
+          node --check advanced.js
+          node --check background.js
+          node --check options.js
+          node --check zip.js
+      - name: Validate Python CLI syntax
+        run: python -m py_compile tools/extension_audit.py
+      - name: Validate manifest JSON and required resources
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          m = json.loads(Path("manifest.json").read_text())
+          assert m["manifest_version"] == 3
+          assert m["version"] == "2.0.0"
+          for p in ["popup.html", "popup.css", "popup.js", "advanced.js", "background.js", "options.html", "options.js", "zip.js"]:
+              assert Path(p).is_file(), f"Missing required resource: {p}"
+          print("Manifest and resource checks passed.")
+          PY
