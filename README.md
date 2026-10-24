@@ -1,5 +1,5 @@
 # Rolex_key Chrome Extension Downloader
-Version 2.1.1 · Manifest V3 · Extension package and developer toolkit
+Version 2.2.0 · Manifest V3 · Extension package and developer toolkit
 
 ## Phase 1 — Core upgrades
 - Metadata dashboard: name, extension ID, version, publisher/author when exposed by the store page, and listing link.
@@ -23,6 +23,12 @@ Version 2.1.1 · Manifest V3 · Extension package and developer toolkit
 - AI Manifest Explainer: optionally use Google Gemini when a key is configured; otherwise use the local rule-based explainer.
 - Developer diagnostics for network/endpoint failures and manifest compatibility.
 - Custom accent color, compact mode, and standard/compact/wide dashboard layouts.
+
+## Version 2.2.0 — CRX extractor and ZIP converter
+- Added a dedicated CRX Extractor tab for locally opening CRX2/CRX3 packages.
+- Lists archive files and paths, filters filenames, previews text/config files, and downloads individual files.
+- Converts all extracted archive contents into a ZIP and calculates its SHA-256.
+- Archive parsing is local, rejects unsafe traversal paths and encrypted entries, and limits extraction to 5,000 files / 200 MB uncompressed. ZIP64 is not supported.
 
 ## Version 2.1.1 bug fixes
 - Accepts IDs from both modern and legacy Chrome Web Store listing URL formats, including a direct ID path.
