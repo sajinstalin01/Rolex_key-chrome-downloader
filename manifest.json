@@ -1,16 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Rolex_key Chrome Extension Downloader",
-  "version": "1.2.0",
-  "description": "Inspect, validate, compare, and download Chrome extension packages with manifest analysis and SHA-256 checks.",
+  "version": "2.0.0",
+  "description": "Download, inspect, compare, audit, and manage Chrome extension packages with local security analysis.",
   "minimum_chrome_version": "110",
-  "permissions": ["downloads", "storage"],
-  "host_permissions": [
-    "https://clients2.google.com/*",
-    "https://chromewebstore.google.com/*",
-    "https://chrome.google.com/*",
-    "https://api.github.com/*"
-  ],
+  "permissions": ["downloads", "storage", "alarms", "notifications"],
+  "host_permissions": ["https://clients2.google.com/*","https://chromewebstore.google.com/*","https://chrome.google.com/*","https://api.github.com/*"],
   "action": { "default_title": "Rolex_key Downloader", "default_popup": "popup.html" },
   "background": { "service_worker": "background.js" },
   "options_page": "options.html"
