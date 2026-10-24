@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rolex_key Chrome Extension Downloader",
-  "version": "2.2.0",
-  "description": "Download, inspect, compare, audit, and manage Chrome extension packages with integrity reports and productivity tools.",
+  "version": "2.3.0",
+  "description": "Download, inspect, compare, audit, and manage Chrome extension packages with premium icons, themes, visual setup guides, and update notifications.",
   "minimum_chrome_version": "110",
   "permissions": [
     "downloads",
@@ -17,7 +17,8 @@
     "https://api.github.com/*",
     "https://generativelanguage.googleapis.com/*",
     "https://dl.google.com/*",
-    "https://*.googleusercontent.com/*"
+    "https://*.googleusercontent.com/*",
+    "https://raw.githubusercontent.com/*"
   ],
   "action": {
     "default_title": "Rolex_key Downloader",
@@ -27,4 +28,4 @@
     "service_worker": "background.js"
   },
   "options_page": "options.html"
-}
+}\n
