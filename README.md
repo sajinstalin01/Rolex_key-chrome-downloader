@@ -24,7 +24,14 @@ Version 2.3.0 · Manifest V3 · Extension package and developer toolkit
 - Developer diagnostics for network/endpoint failures and manifest compatibility.
 - Custom accent color, compact mode, and standard/compact/wide dashboard layouts.
 
-## Version 2.3.0 — Premium UI, setup guide, and update alerts\n- Premium extension identity icons: use the Chrome Web Store image when exposed, with a generated branded fallback based on extension name/ID.\n- Added a graphical four-step install guide with screenshot-style diagrams and direct source ZIP link.\n- Added Midnight Neon, Deep Ocean, Emerald Matrix, Royal Purple, Sunset Ember, and Crystal Light theme presets plus custom accent color.\n- Added automatic daily GitHub manifest version checks, update notifications, an in-popup update banner, and source ZIP download action.\n- Important: unpacked extensions cannot silently self-replace or self-reload. Update alerts automate detection/download, but the user must replace files and reload; Chrome Web Store installations update through Chrome.\n\n## Version 2.2.0 — CRX extractor and ZIP converter
+## Version 2.3.0 — Premium UI, setup guide, and update alerts
+- Premium extension identity icons: use the Chrome Web Store image when exposed, with a generated branded fallback based on extension name/ID.
+- Added a graphical four-step install guide with screenshot-style diagrams and direct source ZIP link.
+- Added Midnight Neon, Deep Ocean, Emerald Matrix, Royal Purple, Sunset Ember, and Crystal Light theme presets plus custom accent color.
+- Added automatic daily GitHub manifest version checks, update notifications, an in-popup update banner, and source ZIP download action.
+- Important: unpacked extensions cannot silently self-replace or self-reload. Update alerts automate detection/download, but the user must replace files and reload; Chrome Web Store installations update through Chrome.
+
+## Version 2.2.0 — CRX extractor and ZIP converter
 - Added a dedicated CRX Extractor tab for locally opening CRX2/CRX3 packages.
 - Lists archive files and paths, filters filenames, previews text/config files, and downloads individual files.
 - Converts all extracted archive contents into a ZIP and calculates its SHA-256.
