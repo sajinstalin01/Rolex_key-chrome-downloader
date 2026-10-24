@@ -14,7 +14,8 @@
     "https://clients2.google.com/*",
     "https://chromewebstore.google.com/*",
     "https://chrome.google.com/*",
-    "https://api.github.com/*"
+    "https://api.github.com/*",
+    "https://generativelanguage.googleapis.com/*"
   ],
   "action": {
     "default_title": "Rolex_key Downloader",
