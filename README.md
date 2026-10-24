@@ -1,5 +1,5 @@
 # Rolex_key Chrome Extension Downloader
-Version 2.1.0 · Manifest V3 · Extension package and developer toolkit
+Version 2.1.1 · Manifest V3 · Extension package and developer toolkit
 
 ## Phase 1 — Core upgrades
 - Metadata dashboard: name, extension ID, version, publisher/author when exposed by the store page, and listing link.
@@ -19,10 +19,16 @@ Version 2.1.0 · Manifest V3 · Extension package and developer toolkit
 - JSON/CSV reports and JSON backup/restore for the local library, tracked IDs, metadata, and history.
 
 ## Phase 4 — Advanced features
-- GitHub release checker compares installed version 2.1.0 with the latest published release.
+- GitHub release checker compares installed version 2.1.1 with the latest published release.
 - AI Manifest Explainer: optionally use Google Gemini when a key is configured; otherwise use the local rule-based explainer.
 - Developer diagnostics for network/endpoint failures and manifest compatibility.
 - Custom accent color, compact mode, and standard/compact/wide dashboard layouts.
+
+## Version 2.1.1 bug fixes
+- Accepts IDs from both modern and legacy Chrome Web Store listing URL formats, including a direct ID path.
+- Improves CRX request timeouts, error detection, and retry handling.
+- If cross-origin package fetching is blocked by Chrome/Google, falls back to Chrome's native download manager instead of failing immediately. In fallback mode, a SHA-256 cannot be calculated in the extension.
+- Adds Google redirect/download host permissions used by the native-download fallback.
 
 ## Install
 1. Download or clone this repository.
