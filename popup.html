@@ -26,7 +26,7 @@
 <div class="section-heading"><div><span class="eyebrow">AUTOMATION</span><h2>Batch CRX queue</h2></div><span class="pill">SEQUENTIAL</span></div>
 <p class="muted">Enter one Chrome extension ID or Web Store listing URL per line. Each package is validated and retried up to 3 times.</p>
 <textarea id="batchInput" rows="5" placeholder="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&#10;https://chromewebstore.google.com/detail/name/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"></textarea>
-<div class="button-row"><button id="batchClearBtn" class="btn secondary">Clear</button><button id="batchStartBtn" class="btn primary">Start queue</button></div>
+<div class="button-row"><button id="batchClearBtn" class="btn secondary">Clear</button><button id="batchStartBtn" class="btn primary">Start queue</button></div><div class="button-row"><button id="batchPauseBtn" class="btn secondary">Pause</button><button id="batchResumeBtn" class="btn secondary">Resume</button><button id="batchCancelBtn" class="btn secondary">Cancel</button></div>
 <div class="progress-track"><div id="batchProgress" class="progress-bar"></div></div><p id="batchStatus" class="muted">Queue idle</p><div id="batchLog" class="batch-log"></div>
 </section>
 <section id="historyPanel" class="panel">
