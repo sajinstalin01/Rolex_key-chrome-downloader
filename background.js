@@ -1,18 +1,6 @@
-const HISTORY_KEY = 'rolexKeyDownloadHistory';
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.get({[HISTORY_KEY]: []}).then(data => {
-    if (!Array.isArray(data[HISTORY_KEY])) chrome.storage.local.set({[HISTORY_KEY]: []});
-  });
-});
-chrome.downloads.onCreated.addListener(item => {
-  addHistory({id:`dl-${item.id}`,name:item.filename?.split(/[\\/]/).pop()||item.url,url:item.url,status:'In progress',time:Date.now(),downloadId:item.id,source:'Chrome download'});
-});
-chrome.downloads.onChanged.addListener(delta => {
-  if (!delta.state && !delta.error) return;
-  chrome.storage.local.get({[HISTORY_KEY]:[]}).then(({[HISTORY_KEY]:items}) => {
-    const next=items.map(item=>{if(item.downloadId!==delta.id)return item;if(delta.state?.current)item.status=delta.state.current==='complete'?'Completed':delta.state.current;if(delta.error?.current)item.status=`Failed: ${delta.error.current}`;return item;});
-    return chrome.storage.local.set({[HISTORY_KEY]:next.slice(0,100)});
-  }).catch(()=>{});
-});
+const HISTORY_KEY='rolexKeyDownloadHistory';
+chrome.runtime.onInstalled.addListener(()=>{chrome.storage.local.get({[HISTORY_KEY]:[]}).then(data=>{if(!Array.isArray(data[HISTORY_KEY]))chrome.storage.local.set({[HISTORY_KEY]:[]});});});
+chrome.downloads.onCreated.addListener(item=>{addHistory({id:'dl-'+item.id,name:item.filename?.split(/[\\/]/).pop()||item.url,url:item.url,status:'In progress',time:Date.now(),downloadId:item.id,source:'Chrome download'});});
+chrome.downloads.onChanged.addListener(delta=>{if(!delta.state&&!delta.error)return;chrome.storage.local.get({[HISTORY_KEY]:[]}).then(({[HISTORY_KEY]:items})=>{const next=items.map(item=>{if(item.downloadId!==delta.id)return item;if(delta.state?.current)item.status=delta.state.current==='complete'?'Completed':delta.state.current;if(delta.error?.current)item.status='Failed: '+delta.error.current;return item;});return chrome.storage.local.set({[HISTORY_KEY]:next.slice(0,100)});}).catch(()=>{});});
 async function addHistory(entry){const data=await chrome.storage.local.get({[HISTORY_KEY]:[]});await chrome.storage.local.set({[HISTORY_KEY]:[entry,...(data[HISTORY_KEY]||[]).filter(x=>x.id!==entry.id)].slice(0,100)});}
 chrome.runtime.onMessage.addListener((message,sender,sendResponse)=>{if(message?.type==='ADD_HISTORY')addHistory(message.entry).then(()=>sendResponse({ok:true})).catch(e=>sendResponse({ok:false,error:e.message}));return message?.type==='ADD_HISTORY';});
