@@ -1,56 +1,47 @@
 # Rolex_key Chrome Extension Downloader
+Version 2.0.0 · Manifest V3 · Extension package and developer toolkit
 
-**Version 1.2.0 · Manifest V3 · Extension packages only**
-
-The universal website/file downloader is not part of this project.
-
-## What's new in 1.2.0
-- CRX4 magic-header and CRX3 header-length validation with explicit errors.
-- SHA-256 integrity hashes for CRX packages, ZIP exports, and local manifest files.
-- Local Manifest V3/manifest analyzer with permission and host-access risk hints.
-- Sequential batch CRX queue with up to three attempts per extension.
-- Local metadata snapshots, version comparison, and a toolbar badge when a changed version is detected.
-- Redesigned dark-first dashboard with Downloader, Analyzer, Batch queue, and History tabs.
-
-## Features
-- Inspect a Chrome Web Store listing URL or extension ID.
-- Request CRX packages from Google's update endpoint when available.
-- Package an authorized local extension folder containing `manifest.json` into ZIP.
-- Keep history, hashes, metadata snapshots, and theme preferences in Chrome local storage.
-- Check the latest published GitHub release from Settings.
+## v2.0.0
+- Local static security scanner: broad host access, sensitive permissions, dynamic-code and remote-network patterns, CSP hints, and obfuscation indicators. Heuristics only, not a malware verdict.
+- Version diff engine: compares two extension folders by relative paths and SHA-256, identifying added, removed, and changed files.
+- Extension library: save IDs/names, open listings, and track IDs for scheduled metadata checks.
+- Scheduled update intelligence: configurable checks while Chrome is running and notifications when parsed version metadata changes.
+- JSON backup/restore for library, tracked IDs, metadata snapshots, history, and theme preference.
+- Developer diagnostics for manifest versions, common MV3 issues, and missing referenced resources.
+- Existing CRX validation, SHA-256, batch queue/retries, ZIP export, history, and GitHub release checker.
+- Offline Python CLI for repeatable local audits and JSON output.
 
 ## Install
-1. Clone/download this repository.
-2. Open `chrome://extensions`.
-3. Enable **Developer mode**.
-4. Select **Load unpacked** and choose this folder containing `manifest.json`.
-5. Pin Rolex_key to the toolbar.
+1. Download or clone this repository.
+2. Open chrome://extensions in desktop Chrome.
+3. Enable Developer mode, click Load unpacked, and select this folder.
+4. Pin Rolex_key to the toolbar.
 
-## Testing checklist
-1. Inspect a valid 32-character extension ID and a Chrome Web Store listing URL.
-2. Try an invalid ID and verify a useful error is shown.
-3. Request a CRX; the response must have the CRX magic header and a plausible CRX3 header length.
-4. Select a local extension folder and run the manifest analyzer.
-5. Confirm the analyzer displays permissions, host permissions, risk hints, and manifest SHA-256.
-6. Create a ZIP and verify its SHA-256 is displayed and stored in history.
-7. Enter several IDs in Batch queue and confirm sequential progress, retries, and per-item status.
-8. Inspect the same listing twice; if the publicly parsed version changes, verify the toolbar badge and popup notice.
-9. Open Settings and test the GitHub release checker after a release exists.
+## CLI
+Requires Python 3.9+ and no third-party packages.
+python tools/extension_audit.py /path/to/unpacked-extension
+python tools/extension_audit.py /path/to/unpacked-extension --json > audit-report.json
+
+## Test checklist
+1. Load the extension and open each dashboard tab.
+2. Scan a sample extension folder and review heuristic findings.
+3. Compare two folders with added, removed, and changed files.
+4. Add an extension to Library and enable scheduled checks in Settings.
+5. Export a JSON backup and import it again.
+6. Run Dev tools and the Python CLI against a sample extension.
+7. Test CRX download where Google's endpoint makes the package available.
+8. Test GitHub release checking after publishing a release.
 
 ## Limitations
-- CRX availability is controlled by Google's endpoint; not every listing will yield a downloadable package.
-- Public store HTML can change, and version metadata may be absent or parsed incorrectly.
-- Static permission analysis is a heuristic, not a malware scanner or a guarantee of safety.
-- Metadata comparison works only when the listing exposes a version that can be parsed. The toolbar badge is a local, popup-triggered notice, not a server-side push notification.
-- ZIP export handles the locally selected folder you own or are authorized to package; it does not extract protected extensions from other browsers.
-- No authentication, paid access, DRM, or other access controls are bypassed.
+- Static analysis can produce false positives and false negatives; it cannot prove an extension safe.
+- Metadata parsing depends on public Chrome Web Store HTML and can break when the page changes.
+- Scheduled checks run while Chrome is running; they are not server-side push notifications.
+- Cloud sync is represented by portable JSON backup/restore, not hosted cloud synchronization. A secure hosted service needs a separate backend and explicit account/security design.
+- Local storage remains on the browser profile; exported backups may include extension IDs and history.
+- CRX availability is subject to Google's endpoints and policies. Only package folders you own or are authorized to process.
 
 ## Files
-- `manifest.json` — Manifest V3 permissions/configuration
-- `popup.html/css/js` — redesigned dashboard and workflows
-- `background.js` — download history tracking
-- `zip.js` — dependency-free local ZIP writer
-- `options.html/css/js` — settings and GitHub release checker
+manifest.json, popup.html/css/js, advanced.js, background.js, zip.js, options.html/css/js, tools/extension_audit.py.
 
 ## License
-MIT (see `LICENSE`).
+MIT (see LICENSE).
