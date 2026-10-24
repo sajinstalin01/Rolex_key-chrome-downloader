@@ -40,3 +40,85 @@ $('historyFilter').addEventListener('change',renderHistory);
 async function exportHistory(format){const d=await chrome.storage.local.get({[HISTORY_KEY]:[],[SNAP_KEY]:{}}),payload={schema:'rolex-key-report-v1',exportedAt:new Date().toISOString(),metadata:Object.values(d[SNAP_KEY]||{}),history:d[HISTORY_KEY]||[]};let text,mime,ext;if(format==='json'){text=JSON.stringify(payload,null,2);mime='application/json';ext='json'}else{const rows=[['record_type','time','name','id','version','publisher','url','status','source','sha256'],...payload.metadata.map(x=>['metadata',new Date(x.checkedAt||0).toISOString(),x.name||'',x.id||'',x.version||'',x.publisher||'',x.url||'','','','']),...payload.history.map(x=>['history',new Date(x.time||0).toISOString(),x.name||'',historyExtensionId(x)||'', '', '', x.url||'',x.status||'',x.source||'',x.sha256||''])];text=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');mime='text/csv';ext='csv'}const url=URL.createObjectURL(new Blob([text],{type:mime})),a=document.createElement('a');a.href=url;a.download='rolex-key-report-'+new Date().toISOString().slice(0,10)+'.'+ext;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000)}
 $('exportHistoryJson').addEventListener('click',()=>exportHistory('json'));
 $('exportHistoryCsv').addEventListener('click',()=>exportHistory('csv'));
+
+
+// CRX archive viewer/converter: parses CRX2/CRX3 headers and reads ZIP central directory locally.
+let crxEntries=[];
+const CRX_MAX_FILES=5000, CRX_MAX_UNCOMPRESSED=200*1024*1024;
+function le16(v,o){return v.getUint16(o,true)} function le32(v,o){return v.getUint32(o,true)}
+async function inflateZipEntry(bytes,method){
+ if(method===0)return bytes;
+ if(method!==8)throw Error('Unsupported ZIP compression method '+method+' (only STORE and DEFLATE are supported).');
+ if(typeof DecompressionStream==='undefined')throw Error('This Chrome version does not support ZIP DEFLATE decompression.');
+ try{const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));return new Uint8Array(await new Response(stream).arrayBuffer())}
+ catch(e){throw Error('Could not decompress ZIP entry: '+e.message)}
+}
+function findZipEnd(bytes,view){
+ const min=Math.max(0,bytes.length-65557);
+ for(let i=bytes.length-22;i>=min;i--){if(le32(view,i)===0x06054b50&&i+22+le16(view,i+20)<=bytes.length)return i}
+ throw Error('ZIP end-of-central-directory record was not found. The CRX may be truncated or use an unsupported ZIP format.');
+}
+async function readCrxArchive(file){
+ const raw=new Uint8Array(await file.arrayBuffer());
+ if(raw.length<16||raw[0]!==67||raw[1]!==114||raw[2]!==50||raw[3]!==52)throw Error('This file does not have a valid CRX magic header.');
+ const view=new DataView(raw.buffer,raw.byteOffset,raw.byteLength),version=le32(view,4);let zipOffset;
+ if(version===3){const header=le32(view,8);zipOffset=12+header;if(header<1||zipOffset>=raw.length)throw Error('Invalid or incomplete CRX3 header.')}
+ else if(version===2){const publicKeyLength=le32(view,8),signatureLength=le32(view,12);zipOffset=16+publicKeyLength+signatureLength;if(zipOffset>=raw.length)throw Error('Invalid or incomplete CRX2 header.')}
+ else throw Error('Unsupported CRX version '+version+'. Supported versions are CRX2 and CRX3.');
+ const zip=raw.subarray(zipOffset);if(zip.length<22)throw Error('The CRX does not contain a complete ZIP archive.');
+ const zv=new DataView(zip.buffer,zip.byteOffset,zip.byteLength),end=findZipEnd(zip,zv);
+ const count=le16(zv,end+10),centralSize=le32(zv,end+12),centralOffset=le32(zv,end+16);
+ if(count===0xffff||centralSize===0xffffffff||centralOffset===0xffffffff)throw Error('ZIP64 archives are not supported by this in-browser converter.');
+ if(count>CRX_MAX_FILES)throw Error('Archive contains '+count+' entries; limit is '+CRX_MAX_FILES+'.');
+ if(centralOffset+centralSize>zip.length)throw Error('ZIP central directory points outside the archive.');
+ const decoder=new TextDecoder(),entries=[];let cursor=centralOffset,total=0;
+ for(let i=0;i<count;i++){
+  if(cursor+46>zip.length||le32(zv,cursor)!==0x02014b50)throw Error('Invalid ZIP central directory entry '+(i+1)+'.');
+  const flags=le16(zv,cursor+8),method=le16(zv,cursor+10),compressed=le32(zv,cursor+20),uncompressed=le32(zv,cursor+24),nameLen=le16(zv,cursor+28),extraLen=le16(zv,cursor+30),commentLen=le16(zv,cursor+32),localOffset=le32(zv,cursor+42);
+  if(flags&1)throw Error('Encrypted ZIP entries are not supported: '+(i+1));
+  if(compressed===0xffffffff||uncompressed===0xffffffff||localOffset===0xffffffff)throw Error('ZIP64 entries are not supported.');
+  const nameBytes=zip.subarray(cursor+46,cursor+46+nameLen);let path=decoder.decode(nameBytes);if(!(flags&0x800)){try{path=decodeURIComponent(escape(path))}catch{}}
+  cursor+=46+nameLen+extraLen+commentLen;
+  if(!path||path.startsWith('/')||/^[a-zA-Z]:/.test(path)||path.split(/[\\/]/).some(part=>part==='..'))throw Error('Unsafe archive path rejected: '+path);
+  if(path.endsWith('/'))continue;
+  total+=uncompressed;if(total>CRX_MAX_UNCOMPRESSED)throw Error('Uncompressed archive exceeds the 200 MB safety limit.');
+  if(localOffset+30>zip.length||le32(zv,localOffset)!==0x04034b50)throw Error('Invalid local ZIP header for '+path);
+  const localName=le16(zv,localOffset+26),localExtra=le16(zv,localOffset+28),dataOffset=localOffset+30+localName+localExtra;
+  if(dataOffset+compressed>zip.length)throw Error('Truncated ZIP entry: '+path);
+  const packed=zip.subarray(dataOffset,dataOffset+compressed),data=await inflateZipEntry(packed,method);
+  if(data.length!==uncompressed)throw Error('Size validation failed for '+path);
+  entries.push({path,bytes:data,size:data.length,blob:new Blob([data])});
+ }
+ return {version,count:entries.length,entries,zipBytes:zip.length,totalBytes:total};
+}
+function formatBytes(n){if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';return (n/1024/1024).toFixed(2)+' MB'}
+function renderCrxEntries(){
+ const host=$('crxFilesList');host.replaceChildren();
+ const q=($('crxFileSearch').value||'').trim().toLowerCase(),filtered=crxEntries.filter(x=>x.path.toLowerCase().includes(q));
+ $('crxFileCount').textContent=filtered.length+' of '+crxEntries.length+' files · '+formatBytes(crxEntries.reduce((n,x)=>n+x.size,0));
+ if(!filtered.length){const e=document.createElement('div');e.className='empty-state';e.textContent=crxEntries.length?'No files match your search.':'Choose a CRX file to inspect its contents.';host.append(e);return}
+ for(const entry of filtered){const row=document.createElement('div');row.className='crx-file-row';const icon=document.createElement('span');icon.className='crx-file-icon';icon.textContent=entry.path.split('.').pop().slice(0,4).toUpperCase()||'FILE';const details=document.createElement('div');details.className='crx-file-details';const name=document.createElement('strong');name.textContent=entry.path;name.title=entry.path;const size=document.createElement('small');size.textContent=formatBytes(entry.size);details.append(name,size);const actions=document.createElement('button');actions.className='mini-btn';actions.textContent='View';actions.addEventListener('click',()=>previewCrxEntry(entry));row.append(icon,details,actions);host.append(row)}
+}
+function previewCrxEntry(entry){
+ const out=$('crxPreview');out.replaceChildren();const title=document.createElement('h3');title.textContent=entry.path;const meta=document.createElement('p');meta.className='muted';meta.textContent=formatBytes(entry.size);
+ out.append(title,meta);
+ const ext=entry.path.split('.').pop().toLowerCase(),textLike=/^(json|js|mjs|html|htm|css|txt|md|xml|svg|yml|yaml|properties|csv)$/i.test(ext);
+ if(textLike&&entry.size<=1024*1024){const pre=document.createElement('pre');pre.className='crx-preview-text';pre.textContent=new TextDecoder().decode(entry.bytes);out.append(pre)}
+ else {const msg=document.createElement('p');msg.className='muted';msg.textContent=entry.size>1024*1024?'Preview hidden for files larger than 1 MB.':'Binary file preview is unavailable.';out.append(msg)}
+ const download=document.createElement('button');download.className='btn secondary full';download.textContent='Download this file';download.addEventListener('click',async()=>{try{await downloadBlob(entry.blob,entry.path.split('/').pop());notice('File download started: '+entry.path)}catch(e){notice('File download failed: '+e.message,true)}});out.append(download);
+}
+$('crxExtractBtn').addEventListener('click',async()=>{
+ const input=$('crxInput'),file=input.files?.[0],btn=$('crxExtractBtn');if(!file){notice('Choose a .crx file first.',true);return}
+ setBusy(btn,true,'Reading archive…');$('crxFilesList').replaceChildren();$('crxPreview').replaceChildren();
+ try{const result=await readCrxArchive(file);crxEntries=result.entries;$('crxResults').classList.remove('hidden');$('crxArchiveSummary').textContent='CRX'+result.version+' · '+result.count+' files · archive '+formatBytes(result.zipBytes)+' · extracted '+formatBytes(result.totalBytes);renderCrxEntries();notice('Archive read successfully. All files are available locally.');addManualHistory(file.name,'local CRX file','Extracted / inspected','CRX archive viewer')}
+ catch(e){crxEntries=[];$('crxResults').classList.add('hidden');notice('Could not extract CRX: '+e.message,true)}
+ finally{setBusy(btn,false)}
+});
+$('crxFileSearch').addEventListener('input',renderCrxEntries);
+$('crxConvertBtn').addEventListener('click',async()=>{
+ if(!crxEntries.length){notice('Load a valid CRX archive first.',true);return}
+ const btn=$('crxConvertBtn');setBusy(btn,true,'Building ZIP…');
+ try{const zip=await ZipStore.build(crxEntries.map(e=>({path:e.path,blob:e.blob}))),hash=await sha256(zip),name=cleanName(($('crxInput').files?.[0]?.name||'extension.crx').replace(/\.crx$/i,''))+'-extracted.zip';await downloadBlob(zip,name);addManualHistory(name,'local CRX archive','Download queued','CRX to ZIP · SHA-256 '+hash,hash);notice('ZIP created · SHA-256 '+hash)}
+ catch(e){notice('ZIP conversion failed: '+e.message,true)}finally{setBusy(btn,false)}
+});
+$('crxClearBtn').addEventListener('click',()=>{crxEntries=[];$('crxInput').value='';$('crxResults').classList.add('hidden');$('crxFilesList').replaceChildren();$('crxPreview').replaceChildren();$('crxFileSearch').value='';notice('CRX viewer cleared.')});
