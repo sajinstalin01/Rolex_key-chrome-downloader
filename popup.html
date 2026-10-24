@@ -1,15 +1,39 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rolex_key Downloader</title><link rel="stylesheet" href="popup.css"></head>
-<body><header><div class="mark">R_</div><div><h1>Rolex_key</h1><p>CHROME EXTENSION DOWNLOADER</p></div><button id="themeBtn" class="icon" title="Toggle theme">◐</button></header>
-<nav><button class="tab active" data-tab="download">Downloader</button><button class="tab" data-tab="history">History</button></nav>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rolex_key Downloader</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+<header><div class="brand-mark">R<span>_</span></div><div class="brand-copy"><h1>Rolex_key</h1><p>EXTENSION PACKAGE STUDIO <b>v1.2.0</b></p></div><button id="themeBtn" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">◐</button></header>
+<nav class="tabs" aria-label="Main navigation"><button class="tab active" data-tab="download">Downloader</button><button class="tab" data-tab="analyzer">Analyzer</button><button class="tab" data-tab="batch">Batch queue</button><button class="tab" data-tab="history">History</button></nav>
 <main>
 <section id="downloadPanel" class="panel active">
-<label for="storeUrl">Chrome Web Store URL or extension ID</label><input id="storeUrl" placeholder="Paste listing URL or 32-character ID" autocomplete="off">
-<div class="actions"><button id="inspectBtn" class="secondary">Inspect metadata</button><button id="crxBtn">Download CRX</button></div>
-<div id="metadataCard" class="card hidden"><strong id="metaName">Extension</strong><p id="metaId"></p><p id="metaVersion"></p></div>
-<div class="separator"></div><h2>Export a local extension as ZIP</h2><p class="muted">Select files from an extension folder you own or are authorized to package. The root folder must contain manifest.json.</p>
-<input id="sourceFiles" type="file" webkitdirectory multiple><button id="zipBtn" class="wide">Create extension ZIP</button>
-<div id="notice" role="status" class="notice"></div><button id="optionsBtn" class="textbtn">Settings & updates ↗</button>
+<div class="section-heading"><div><span class="eyebrow">CHROME WEB STORE</span><h2>Extension package</h2></div><span class="status-dot">● READY</span></div>
+<label for="storeUrl">Store listing URL or extension ID</label><input id="storeUrl" placeholder="Paste a listing URL or 32-character ID" autocomplete="off">
+<div class="button-row"><button id="inspectBtn" class="btn secondary">Inspect metadata</button><button id="crxBtn" class="btn primary">Download CRX</button></div>
+<div id="metadataCard" class="metadata-card hidden"><div class="meta-title"><span class="file-icon">CRX</span><div><strong id="metaName">Extension</strong><small id="metaVersion">Version: —</small></div></div><p id="metaId" class="mono"></p><div id="metaCompare" class="compare-line"></div></div>
+<div class="section-divider"></div>
+<div class="section-heading"><div><span class="eyebrow">LOCAL FILES ONLY</span><h2>Package extension folder</h2></div><span class="pill">ZIP</span></div>
+<p class="muted">Select an extension folder you own or may package. Its root must contain manifest.json. Files are processed locally.</p><input id="sourceFiles" type="file" webkitdirectory multiple>
+<button id="zipBtn" class="btn primary full">Create ZIP + SHA-256</button>
+<div id="notice" role="status" aria-live="polite" class="notice"></div>
 </section>
-<section id="historyPanel" class="panel"><div class="row"><h2>Recent activity</h2><button id="clearHistoryBtn" class="textbtn">Clear</button></div><div id="historyList"><div class="empty">Your extension activity appears here.</div></div></section>
-</main><footer>v1.1.0 · Extension packages only</footer><script src="zip.js"></script><script src="popup.js"></script></body></html>
+<section id="analyzerPanel" class="panel">
+<div class="section-heading"><div><span class="eyebrow">SECURITY INSPECTOR</span><h2>Manifest analyzer</h2></div><span class="pill">LOCAL</span></div>
+<p class="muted">Choose extension files above in Downloader, or select the folder here. Nothing is uploaded.</p><input id="analyzerFiles" type="file" webkitdirectory multiple>
+<button id="analyzeBtn" class="btn primary full">Analyze manifest & permissions</button>
+<div id="analysisResult" class="analysis-result"><div class="empty-state">Manifest details and permission risk flags will appear here.</div></div>
+</section>
+<section id="batchPanel" class="panel">
+<div class="section-heading"><div><span class="eyebrow">AUTOMATION</span><h2>Batch CRX queue</h2></div><span class="pill">SEQUENTIAL</span></div>
+<p class="muted">Enter one Chrome extension ID or Web Store listing URL per line. Each package is validated and retried up to 3 times.</p>
+<textarea id="batchInput" rows="5" placeholder="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&#10;https://chromewebstore.google.com/detail/name/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"></textarea>
+<div class="button-row"><button id="batchClearBtn" class="btn secondary">Clear</button><button id="batchStartBtn" class="btn primary">Start queue</button></div>
+<div class="progress-track"><div id="batchProgress" class="progress-bar"></div></div><p id="batchStatus" class="muted">Queue idle</p><div id="batchLog" class="batch-log"></div>
+</section>
+<section id="historyPanel" class="panel">
+<div class="section-heading"><div><span class="eyebrow">LOCAL ACTIVITY</span><h2>Recent activity</h2></div><button id="clearHistoryBtn" class="text-btn">Clear history</button></div>
+<div id="historyList"><div class="empty-state">Your extension activity appears here.</div></div>
+</section>
+<footer><span>ROLEX_KEY</span><span>Manifest V3 · Extension-only</span><button id="optionsBtn" class="text-btn">Settings ↗</button></footer>
+</main>
+<script src="zip.js"></script><script src="popup.js"></script>
+</body></html>
