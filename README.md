@@ -1,15 +1,28 @@
 # Rolex_key Chrome Extension Downloader
-Version 2.0.0 · Manifest V3 · Extension package and developer toolkit
+Version 2.1.0 · Manifest V3 · Extension package and developer toolkit
 
-## v2.0.0
-- Local static security scanner: broad host access, sensitive permissions, dynamic-code and remote-network patterns, CSP hints, and obfuscation indicators. Heuristics only, not a malware verdict.
-- Version diff engine: compares two extension folders by relative paths and SHA-256, identifying added, removed, and changed files.
-- Extension library: save IDs/names, open listings, and track IDs for scheduled metadata checks.
-- Scheduled update intelligence: configurable checks while Chrome is running and notifications when parsed version metadata changes.
-- JSON backup/restore for library, tracked IDs, metadata snapshots, history, and theme preference.
-- Developer diagnostics for manifest versions, common MV3 issues, and missing referenced resources.
-- Existing CRX validation, SHA-256, batch queue/retries plus pause/resume/cancel controls, ZIP export, history, and GitHub release checker.
-- Offline Python CLI for repeatable local audits and JSON output.
+## Phase 1 — Core upgrades
+- Metadata dashboard: name, extension ID, version, publisher/author when exposed by the store page, and listing link.
+- One-click ZIP export for a locally selected extension folder, with SHA-256 checksum.
+- Searchable/filterable history, retry failed CRX downloads, copy extension IDs, and export metadata/history as JSON or CSV.
+
+## Phase 2 — Security and verification
+- SHA-256 for downloaded CRX packages, ZIP exports, and selected manifest files.
+- Manifest inspector with permissions, host access, version, and manifest version.
+- Permission-risk flags for broad host access and powerful/sensitive capabilities.
+- Recorded integrity report compares saved hashes locally. A hash change is a difference signal, not publisher authentication or a malware verdict.
+
+## Phase 3 — Productivity
+- Batch queue with pause/resume/cancel and exponential backoff for temporary failures.
+- Metadata snapshots and version comparison.
+- Favorites and named collections for frequently used extensions.
+- JSON/CSV reports and JSON backup/restore for the local library, tracked IDs, metadata, and history.
+
+## Phase 4 — Advanced features
+- GitHub release checker compares installed version 2.1.0 with the latest published release.
+- AI Manifest Explainer: optionally use Google Gemini when a key is configured; otherwise use the local rule-based explainer.
+- Developer diagnostics for network/endpoint failures and manifest compatibility.
+- Custom accent color, compact mode, and standard/compact/wide dashboard layouts.
 
 ## Install
 1. Download or clone this repository.
@@ -17,31 +30,33 @@ Version 2.0.0 · Manifest V3 · Extension package and developer toolkit
 3. Enable Developer mode, click Load unpacked, and select this folder.
 4. Pin Rolex_key to the toolbar.
 
+## Configure Gemini (optional)
+1. Open the extension's Settings page.
+2. Enter your Gemini API key and save appearance settings.
+3. Use Analyzer → Explain manifest in simple language.
+
+Only the selected manifest JSON is sent to Google's Gemini endpoint when the AI explainer is invoked. The key is stored in Chrome local storage in your profile; do not configure it on a shared device. Remove it from Settings when no longer needed. If the API is unavailable, the local rule-based explanation is used.
+
 ## CLI
 Requires Python 3.9+ and no third-party packages.
+```bash
 python tools/extension_audit.py /path/to/unpacked-extension
 python tools/extension_audit.py /path/to/unpacked-extension --json > audit-report.json
-
-## Test checklist
-1. Load the extension and open each dashboard tab.
-2. Scan a sample extension folder and review heuristic findings.
-3. Compare two folders with added, removed, and changed files.
-4. Add an extension to Library and enable scheduled checks in Settings.
-5. Export a JSON backup and import it again.
-6. Run Dev tools and the Python CLI against a sample extension.
-7. Test CRX download where Google's endpoint makes the package available.
-8. Test GitHub release checking after publishing a release.\n9. Review the GitHub Actions validation workflow after each push.
+```
 
 ## Limitations
-- Static analysis can produce false positives and false negatives; it cannot prove an extension safe.
-- Metadata parsing depends on public Chrome Web Store HTML and can break when the page changes.
-- Scheduled checks run while Chrome is running; they are not server-side push notifications.
-- Cloud sync is represented by portable JSON backup/restore, not hosted cloud synchronization. A secure hosted service needs a separate backend and explicit account/security design.
-- Local storage remains on the browser profile; exported backups may include extension IDs and history.
-- CRX availability is subject to Google's endpoints and policies. Only package folders you own or are authorized to process.
+- Publisher and version metadata depend on public store HTML and may not be exposed consistently.
+- Static security checks can produce false positives/negatives and cannot prove an extension safe.
+- Recorded integrity compares local hashes only; it does not authenticate the original publisher.
+- Scheduled update checks run while Chrome is running and depend on the store page structure.
+- JSON backup/restore is local export/import, not hosted cloud sync.
+- CRX download and endpoint behavior depend on Google's availability and policies.
 
-## Files
-manifest.json, popup.html/css/js, advanced.js, background.js, zip.js, options.html/css/js, tools/extension_audit.py.
+## Automated validation
+GitHub Actions checks JavaScript syntax, Python CLI syntax, Manifest V3 JSON, and required resources. Browser-based tests are still needed for real downloads, ZIP extraction, notifications, and endpoint behavior.
+
+## Project files
+manifest.json, popup.html/css/js, advanced.js, background.js, zip.js, options.html/css/js, tools/extension_audit.py, .github/workflows/validate.yml.
 
 ## License
 MIT (see LICENSE).
