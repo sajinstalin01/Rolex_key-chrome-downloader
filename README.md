@@ -8,7 +8,7 @@ Version 2.0.0 · Manifest V3 · Extension package and developer toolkit
 - Scheduled update intelligence: configurable checks while Chrome is running and notifications when parsed version metadata changes.
 - JSON backup/restore for library, tracked IDs, metadata snapshots, history, and theme preference.
 - Developer diagnostics for manifest versions, common MV3 issues, and missing referenced resources.
-- Existing CRX validation, SHA-256, batch queue/retries, ZIP export, history, and GitHub release checker.
+- Existing CRX validation, SHA-256, batch queue/retries plus pause/resume/cancel controls, ZIP export, history, and GitHub release checker.
 - Offline Python CLI for repeatable local audits and JSON output.
 
 ## Install
@@ -30,7 +30,7 @@ python tools/extension_audit.py /path/to/unpacked-extension --json > audit-repor
 5. Export a JSON backup and import it again.
 6. Run Dev tools and the Python CLI against a sample extension.
 7. Test CRX download where Google's endpoint makes the package available.
-8. Test GitHub release checking after publishing a release.
+8. Test GitHub release checking after publishing a release.\n9. Review the GitHub Actions validation workflow after each push.
 
 ## Limitations
 - Static analysis can produce false positives and false negatives; it cannot prove an extension safe.
